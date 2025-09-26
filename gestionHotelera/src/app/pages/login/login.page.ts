@@ -1,20 +1,86 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { Component } from '@angular/core';
+import { AlertController } from '@ionic/angular';
+import { DataService } from '../../services/data.service';
+import { NavController } from '@ionic/angular';
+import { AuthService } from '@auth0/auth0-angular';
+import { MenuController } from '@ionic/angular';
+import { Preferences } from '@capacitor/preferences';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  standalone: false,
 })
-export class LoginPage implements OnInit {
+export class LoginPage {
+  correo: string = 'ejemplo@email.com';
+  password: string = '';
+  errorPassword: boolean = false;
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor(
+    private navCtrl: NavController,
+    private alertController: AlertController,
+    private dataService: DataService,
+    public auth: AuthService,
+    private menu: MenuController
+  ) {
+    this.menu.enable(true, 'mainMenu');
   }
 
+  async mostrarAlerta(mensaje: string) {
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message: mensaje,
+      buttons: ['OK'],
+    });
+    await alert.present();
+  }
+
+  validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  async login() {
+    if (!this.validarEmail(this.correo) || this.password.trim() === '') {
+      this.mostrarAlerta('Por favor, ingresa un correo válido y contraseña.');
+      return;
+    }
+
+    const user = await this.dataService.loginUser(this.correo, this.password);
+
+    if (user) {
+      await Preferences.set({
+        key: 'user_session',
+        value: JSON.stringify(user)
+      });
+
+      localStorage.setItem('usuarioActivo', 'true');
+
+      this.navCtrl.navigateForward(['/home'], {
+        queryParams: {
+          email: user.correo
+        }
+      });
+    } else {
+      this.mostrarAlerta('Correo o contraseña incorrectos');
+    }
+  }
+
+  loginCalendar() {
+    this.auth.loginWithRedirect({
+      authorizationParams: {
+        connection: 'google-oauth2',
+        scope: 'openid profile email https://www.googleapis.com/auth/calendar'
+      }
+    });
+  }
+
+  irARecuperarContrasena() {
+    this.navCtrl.navigateForward('/recuperar-contrasena');
+  }
+
+  registro() {
+    this.navCtrl.navigateForward(['/registro']);
+  }
 }
