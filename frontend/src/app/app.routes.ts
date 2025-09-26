@@ -18,4 +18,12 @@ export const routes: Routes = [
     path: 'reserva',
     loadComponent: () => import('./pages/reserva/reserva.page').then( m => m.ReservaPage)
   },
+  {
+    path: 'habitaciones',
+    loadComponent: () => import('./pages/habitaciones/habitaciones.page').then( m => m.HabitacionesPage)
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.page').then( m => m.LoginPage)
+  },
 ];
