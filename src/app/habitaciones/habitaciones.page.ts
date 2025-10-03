@@ -25,9 +25,17 @@ export class HabitacionesPage implements OnInit {
   }
 
   agregarHabitacion() {
-    this.habitacionesService.addHabitacion(this.nuevaHabitacion).subscribe(() => {
-      this.cargarHabitaciones(); // recargar lista
-      this.nuevaHabitacion = { numero: 0, tipo: '', precio: 0 }; // limpiar form
+    console.log('Intentando agregar habitación:', this.nuevaHabitacion);
+    this.habitacionesService.addHabitacion(this.nuevaHabitacion).subscribe({
+      next: (response) => {
+        console.log('Habitación agregada exitosamente:', response);
+        this.cargarHabitaciones(); // recargar lista
+        this.nuevaHabitacion = { numero: 0, tipo: '', precio: 0 }; // limpiar form
+      },
+      error: (error) => {
+        console.error('Error al agregar habitación:', error);
+        alert('Error al agregar habitación: ' + (error.error?.details || error.message));
+      }
     });
   }
 }
