@@ -75,5 +75,5 @@ backend/__pycache__/
 backend/*.pyc
 
 # Auth0 y configuraciones sensibles
-src/environments/environment.ts
-src/environments/environment.prod.ts
+# src/environments/environment.ts
+# src/environments/environment.prod.ts
